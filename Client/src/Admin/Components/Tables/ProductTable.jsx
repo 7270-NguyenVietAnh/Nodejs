@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AiOutlineSearch, AiOutlineEdit, AiOutlinePlus } from 'react-icons/ai';
+import { AiOutlineSearch, AiOutlineEdit } from 'react-icons/ai';
 import {
     Table,
     TableBody,
@@ -10,25 +10,26 @@ import {
     Paper,
     Container,
     InputAdornment,
-    TextField,
-    Button,
     IconButton,
-    Box,
+    TextField,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
+import axios from 'axios'; // Import axios để gọi API
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import AddProduct from '../AddProduct';
 
 const ProductTable = () => {
     const [data, setData] = useState([]); // State lưu danh sách sản phẩm
     const [filteredData, setFilteredData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
-
     const columns = [
-        { id: 'image', label: 'Image', minWidth: 100, align: 'center' },
         { id: 'name', label: 'Name', minWidth: 170, align: 'center' },
+        { id: 'image', label: 'Image', minWidth: 100, align: 'center' },
+        { id: 'type', label: 'Product Type', align: 'center', minWidth: 100 },
         { id: 'price', label: 'Price', minWidth: 100, align: 'center' },
-        { id: 'actions', label: 'Actions', minWidth: 100, align: 'center' },
+        { id: 'rating', label: 'Rating', minWidth: 100, align: 'center' },
+        { id: 'edit', label: 'Edit', minWidth: 100, align: 'center' },
     ];
 
     // Hàm gọi API lấy danh sách sản phẩm
@@ -49,7 +50,9 @@ const ProductTable = () => {
         return data.filter(
             (item) =>
                 (item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                (item.price && item.price.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+                (item.type && item.type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (item.price && item.price.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (item.rating && item.rating.toString().toLowerCase().includes(searchTerm.toLowerCase()))
         );
     };
 
@@ -72,33 +75,24 @@ const ProductTable = () => {
 
     return (
         <>
-            <Container sx={{ marginBottom: 5, marginTop: 5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                    <TextField
-                        id="search"
-                        type="search"
-                        label="Search Products"
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        sx={{ width: { xs: 350, sm: 500, md: 800 } }}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <AiOutlineSearch />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<AiOutlinePlus />}
-                        onClick={() => navigate('/admin/home/product/add')}
-                    >
-                        Add Product
-                    </Button>
-                </Box>
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 5, marginTop: 5 }}>
+                <TextField
+                    id="search"
+                    type="search"
+                    label="Search Products"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    sx={{ width: { xs: 350, sm: 500, md: 800 } }}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <AiOutlineSearch />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
             </Container>
+            <AddProduct getProductInfo={fetchProducts} /> {/* Truyền hàm fetchProducts để cập nhật danh sách */}
             <Paper style={{ overflow: 'auto', maxHeight: '500px' }}>
                 <TableContainer sx={{ maxHeight: '500px' }}>
                     <Table stickyHeader aria-label="sticky table">
@@ -127,15 +121,35 @@ const ProductTable = () => {
                             ) : (
                                 filteredData.map((prod) => (
                                     <TableRow key={prod._id}>
-                                        <TableCell align="center">
-                                            <img
-                                                src={`http://localhost:3000${encodeURI(prod.imgURL)}`}
-                                                alt={prod.name}
-                                                style={{ width: '100px', height: '100px', objectFit: 'contain' }}
-                                            />
+                                        <TableCell component="th" scope="row" align="center">
+                                            <Link to={`/admin/home/product/${prod.type}/${prod._id}`}>
+                                                {prod.name.slice(0, 20)}
+                                            </Link>
                                         </TableCell>
-                                        <TableCell align="center">{prod.name}</TableCell>
-                                        <TableCell align="center">₹{prod.price}</TableCell>
+                                        <TableCell align="center">
+                                            <Link to={`/admin/home/product/${prod.type}/${prod._id}`}>
+                                                <img
+                                                     src={`http://localhost:3000${encodeURI(prod.imgURL)}`} // 
+                                                    alt={prod.name}
+                                                    style={{ width: '100px', height: '100px', objectFit: 'contain' }}
+                                                />
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Link to={`/admin/home/product/${prod.type}/${prod._id}`}>
+                                                {prod.type}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Link to={`/admin/home/product/${prod.type}/${prod._id}`}>
+                                                ₹{prod.price}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Link to={`/admin/home/product/${prod.type}/${prod._id}`}>
+                                                {prod.rating}
+                                            </Link>
+                                        </TableCell>
                                         <TableCell align="center">
                                             <IconButton
                                                 color="primary"
