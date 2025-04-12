@@ -3,6 +3,21 @@ var router = express.Router();
 let productSchema = require('../schemas/product')
 let categorySchema = require('../schemas/category')
 let slugify = require('slugify')
+const multer = require('multer');
+const path = require('path');
+
+// Cấu hình nơi lưu ảnh và tên file
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/'); // tạo thư mục 'uploads' trong thư mục gốc
+    },
+    filename: function (req, file, cb) {
+        const ext = path.extname(file.originalname);
+        cb(null, Date.now() + ext); // tên file là timestamp + đuôi file
+    }
+});
+
+const upload = multer({ storage: storage });
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
     let query = req.query;
@@ -34,7 +49,7 @@ router.get('/', async function (req, res, next) {
             objQuery.price.$lte = 10000;
         }
     } else {
-        objQuery.price.$lte = 10000;
+        objQuery.price.$lte = 999999999;
         objQuery.price.$gte = 0;
     }
 
@@ -66,11 +81,11 @@ router.post('/', async function (req, res, next) {
         if (category) {
             let newProduct = productSchema({
                 name: body.name,
-                price: body.price ? body.price : 1000,
+                price: body.price ? body.price : 999999999,
                 quantity: body.quantity ? body.quantity : 10,
                 category: category._id,
                 description: body.description || "",
-                imgURL: body.imgURL || "", 
+                imgURL: body.imgURL || "",
                 slug: slugify(body.name, {
                     lower: true
                 })
@@ -94,32 +109,44 @@ router.post('/', async function (req, res, next) {
     }
 });
 
-router.put('/:id', async function (req, res, next) {
+router.put('/:id', upload.single('image'), async function (req, res, next) {
     try {
         let body = req.body;
-        let updatedObj = {}
+        let updatedObj = {};
+
+        // Cập nhật các trường thông tin sản phẩm
         if (body.name) {
-            updatedObj.name = body.name
+            updatedObj.name = body.name;
         }
         if (body.quantity) {
-            updatedObj.quantity = body.quantity
+            updatedObj.quantity = body.quantity;
         }
         if (body.price) {
-            updatedObj.price = body.price
+            updatedObj.price = body.price;
         }
         if (body.category) {
-            updatedObj.category = body.category
+            updatedObj.category = body.category;
         }
-        let updatedProduct = await productSchema.findByIdAndUpdate(req.params.id, updatedObj, { new: true })
+        if (body.description) {
+            updatedObj.description = body.description;
+        }
+
+        // Nếu có file ảnh được upload, cập nhật imgURL
+        if (req.file) {
+            updatedObj.imgURL = `/uploads/${req.file.filename}`;
+        }
+
+        // Cập nhật sản phẩm trong cơ sở dữ liệu
+        let updatedProduct = await productSchema.findByIdAndUpdate(req.params.id, updatedObj, { new: true });
         res.status(200).send({
             success: true,
-            data: updatedProduct
+            data: updatedProduct,
         });
     } catch (error) {
         res.status(404).send({
             success: false,
-            message: error.message
-        })
+            message: error.message,
+        });
     }
 });
 router.delete('/:id', async function (req, res, next) {
@@ -140,21 +167,7 @@ router.delete('/:id', async function (req, res, next) {
     }
 });
 
-const multer = require('multer');
-const path = require('path');
 
-// Cấu hình nơi lưu ảnh và tên file
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads/'); // tạo thư mục 'uploads' trong thư mục gốc
-    },
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        cb(null, Date.now() + ext); // tên file là timestamp + đuôi file
-    }
-});
-
-const upload = multer({ storage: storage });
 
 
 module.exports = router;

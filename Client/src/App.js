@@ -21,7 +21,7 @@ import AdminRegister from './Admin/Auth/Register/AdminRegister';
 import AdminHomePage from './Admin/Pages/AdminHomePage';
 import SingleUserPage from './Admin/Pages/SingleUserPage';
 import SingleProduct from './Admin/Pages/SingleProduct';
-
+import EditProduct from './Admin/Pages/EditProduct';
 //import CategoryTable from './Admin/Tables/CategoryTable';
 
 
@@ -55,7 +55,7 @@ function App() {
             <Route path='/admin/register' element={<AdminRegister />} />
             <Route path='/admin/home' element={<AdminHomePage />} />
             <Route path='/admin/home/user/:id' element={<SingleUserPage />} />
-            
+            <Route path='/admin/home/product/edit/:id' element={<EditProduct />} />
             <Route path='/admin/home/product/:type/:id' element={<SingleProduct />} />
           </Routes>
         </div>
