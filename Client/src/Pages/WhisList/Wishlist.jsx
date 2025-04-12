@@ -23,33 +23,35 @@ const Wishlist = () => {
     }, [])
     const getWishList = async () => {
         if (setProceed) {
-            const { data } = await axios.get(`${process.env.REACT_APP_GET_WISHLIST}`,
-                {
+            try {
+                const { data } = await axios.get(`http://localhost:3000/wishlist`, {
                     headers: {
-                        'Authorization': authToken
-                    }
-                })
-            setWishlistData(data)
+                        Authorization: authToken,
+                    },
+                });
+                setWishlistData(data);
+            } catch (error) {
+                toast.error("Error fetching wishlist", { autoClose: 500, theme: 'colored' });
+            }
+        } else {
+            setOpenAlert(true);
         }
-        else {
-            setOpenAlert(true)
-        }
-    }
+    };
     const removeFromWishlist = async (product) => {
         if (setProceed) {
             try {
-                const deleteProduct = await axios.delete(`${process.env.REACT_APP_DELETE_WISHLIST}/${product._id}`, {
+                await axios.delete(`http://localhost:3000/wishlist/remove/${product.productId._id}`, {
                     headers: {
-                        'Authorization': authToken
-                    }
-                })
-                setWishlistData(wishlistData.filter(c => c.productId._id !== product.productId._id))
-                toast.success("Removed From Wishlist", { autoClose: 500, theme: 'colored' })
+                        Authorization: authToken,
+                    },
+                });
+                setWishlistData(wishlistData.filter((c) => c.productId._id !== product.productId._id));
+                toast.success("Removed From Wishlist", { autoClose: 500, theme: 'colored' });
             } catch (error) {
-                toast.error(error, { autoClose: 500, theme: 'colored' })
+                toast.error("Error removing product from wishlist", { autoClose: 500, theme: 'colored' });
             }
         }
-    }
+    };
     const handleClose = () => {
         setOpenAlert(false);
         navigate('/')
