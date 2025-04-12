@@ -6,13 +6,21 @@ let slugify = require('slugify')
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
     let query = req.query;
-    console.log(query);
     let objQuery = {};
-    if (query.name) {
-        objQuery.name = new RegExp(query.name, 'i')
-    } else {
-        objQuery.name = new RegExp("", 'i')
+
+    if (query.category) {
+        const category = await categorySchema.findOne({ slug: query.category });
+        if (category) {
+            objQuery.category = category._id;
+        } else {
+            return res.status(404).send({ success: false, message: 'Category not found' });
+        }
     }
+
+    if (query.name) {
+        objQuery.name = new RegExp(query.name, 'i');
+    }
+
     objQuery.price = {};
     if (query.price) {
         if (query.price.$gte) {
@@ -30,9 +38,10 @@ router.get('/', async function (req, res, next) {
         objQuery.price.$gte = 0;
     }
 
-    let products = await productSchema.find(objQuery).populate(
-        { path: 'category', select: 'name' }
-    );
+    let products = await productSchema.find(objQuery).populate({
+        path: 'category',
+        select: 'name',
+    });
     res.send(products);
 });
 

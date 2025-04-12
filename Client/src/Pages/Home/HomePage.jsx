@@ -52,17 +52,6 @@ const HomePage = () => {
                         ))
                     }
                 </Container>
-                <Typography variant='h4' sx={{ textAlign: 'center', marginTop: 10, color: '#1976d2', fontWeight: 'bold' }}>Products</Typography>
-                <Container maxWidth='xl' style={{ marginTop: 20, display: "flex", justifyContent: 'center', flexWrap: 'wrap', gap: 20 }}>
-                    {
-                        products.map(product => (
-                            <div key={product._id}>
-                                <Typography variant="h6">{product.name}</Typography>
-                                <Typography>Price: ${product.price}</Typography>
-                            </div>
-                        ))
-                    }
-                </Container>
             </Container >
             <CopyRight sx={{ mt: 8, mb: 10 }} />
         </>

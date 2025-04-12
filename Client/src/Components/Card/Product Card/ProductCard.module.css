@@ -28,6 +28,13 @@
     margin: auto;
 }
 
+.cart_box img {
+    width: 100%; /* Chiều rộng tự động vừa với thẻ cha */
+    height: 100%; /* Chiều cao tự động vừa với thẻ cha */
+    object-fit: contain; /* Đảm bảo hình ảnh không bị cắt */
+    display: block; /* Loại bỏ khoảng trắng bên dưới hình ảnh */
+}
+
 .cart_img {
     height: 100%;
     width: 100%;

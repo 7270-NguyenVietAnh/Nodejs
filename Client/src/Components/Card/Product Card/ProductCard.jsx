@@ -7,7 +7,11 @@ export default function ProductCard({ prod }) {
         <Card className={styles.main_card}>
             <CardActionArea className={styles.card_action}>
                 <Box className={styles.cart_box}>
-                    <img alt={prod.name} src={prod.image} loading='lazy' className={styles.cart_img} />
+                    <img
+                        src={`http://localhost:3000${encodeURI(prod.imgURL)}`}
+                        alt={prod.name}
+                        style={styles.cart_box_img}
+                    />
                 </Box>
                 <CardContent>
                     <Typography gutterBottom variant="h6" sx={{ textAlign: "center" }}>
