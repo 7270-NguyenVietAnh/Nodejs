@@ -15,7 +15,6 @@ import {
     Rating,
     ButtonGroup,
     Skeleton,
-    IconButton,
 } from '@mui/material';
 import { MdAddShoppingCart } from 'react-icons/md'
 import { AiFillHeart, AiFillCloseCircle, AiOutlineLogin, AiOutlineShareAlt } from 'react-icons/ai'
@@ -23,7 +22,6 @@ import { TbDiscount2 } from 'react-icons/tb'
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { ContextFunction } from '../../Context/Context';
-import ProductReview from '../../Components/Review/ProductReview';
 import ProductCard from '../../Components/Card/Product Card/ProductCard';
 import { Transition, getSingleProduct } from '../../Constants/Constant';
 import CopyRight from '../../Components/CopyRight/CopyRight';
@@ -45,11 +43,30 @@ const ProductDetail = () => {
 
 
     useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const { data } = await axios.get(`http://localhost:3000/products/${id}`);
+                setProduct(data.data); // Lấy thông tin sản phẩm từ API
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching product:', error);
+                setLoading(false);
+            }
+        };
 
-        getSingleProduct(setProduct, id, setLoading)
-        getSimilarProducts()
-        window.scroll(0, 0)
-    }, [id])
+        const fetchSimilarProducts = async () => {
+            try {
+                const { data } = await axios.get(`http://localhost:3000/products?category=${cat}`);
+                setSimilarProduct(data.filter((prod) => prod._id !== id)); // Lọc sản phẩm cùng loại, loại bỏ sản phẩm hiện tại
+            } catch (error) {
+                console.error('Error fetching similar products:', error);
+            }
+        };
+
+        fetchProduct();
+        fetchSimilarProducts();
+        window.scroll(0, 0); // Cuộn lên đầu trang
+    }, [id, cat]);
     const addToCart = async (product) => {
         if (setProceed) {
             try {
@@ -139,6 +156,25 @@ const ProductDetail = () => {
             setProductQuantity(1)
         }
     }
+    if (loading) {
+        return (
+            <Container maxWidth="md">
+                <Skeleton variant="rectangular" height={400} />
+                <Skeleton variant="text" height={50} />
+                <Skeleton variant="text" height={50} />
+            </Container>
+        );
+    }
+
+    if (!product) {
+        return (
+            <Container maxWidth="md">
+                <Typography variant="h5" color="error">
+                    Product not found
+                </Typography>
+            </Container>
+        );
+    }
     return (
         <>
             <Container maxWidth='xl' >
@@ -167,7 +203,11 @@ const ProductDetail = () => {
                     ) : (
                         <div className="product-image">
                             <div className='detail-img-box'  >
-                                <img alt={product.name} src={product.image} className='detail-img' />
+                                    <img
+                                        src={`http://localhost:3000${encodeURI(product.imgURL)}`}
+                                        alt={product.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    />
                                 <br />
                             </div>
                         </div>
@@ -195,16 +235,8 @@ const ProductDetail = () => {
                                     }
                                 </div>
                             </Typography>
-                            <Chip
-                                label={product.price > 1000 ? "Upto 9% off" : "Upto 38% off"}
-                                variant="outlined"
-                                sx={{ background: '#1976d2', color: 'white', width: '150px', fontWeight: 'bold' }}
-                                avatar={<TbDiscount2 color='white' />}
-
-
-                            />
+                            
                             <div style={{ display: 'flex', gap: 20 }}>
-                                <Typography variant="h6" color="red"><s> ₹{product.price > 1000 ? product.price + 1000 : product.price + 300}</s> </Typography>
                                 <Typography variant="h6" color="primary">
                                     ₹{product.price}
                                 </Typography>
@@ -244,20 +276,17 @@ const ProductDetail = () => {
                         </section>
                     )}
                 </main>
-                <ProductReview setProceed={setProceed} authToken={authToken} id={id} setOpenAlert={setOpenAlert} />
 
 
-                <Typography sx={{ marginTop: 10, marginBottom: 5, fontWeight: 'bold', textAlign: 'center' }}>Similar Products</Typography>
-                <Box>
-                    <Box className='similarProduct' sx={{ display: 'flex', overflowX: 'auto', marginBottom: 10 }}>
-                        {
-                            similarProduct.filter(prod => prod._id !== id).map(prod => (
-                                <Link to={`/Detail/type/${prod.type}/${prod._id}`} key={prod._id}>
-                                    <ProductCard prod={prod} />
-                                </Link>
-                            ))
-                        }
-                    </Box>
+                <Typography sx={{ marginTop: 10, marginBottom: 5, fontWeight: 'bold', textAlign: 'center' }}>
+                    Similar Products
+                </Typography>
+                <Box sx={{ display: 'flex', overflowX: 'auto', marginBottom: 10 }}>
+                    {similarProduct.map((prod) => (
+                        <Link to={`/Detail/type/${cat}/${prod._id}`} key={prod._id}>
+                            <ProductCard prod={prod} />
+                        </Link>
+                    ))}
                 </Box>
 
             </Container >
