@@ -126,7 +126,7 @@ const ProductTable = () => {
                                         <TableCell align="center">
                                             <Link to={`/admin/home/product/${prod.type}/${prod._id}`}>
                                                 <img
-                                                     src={`http://localhost:3000${prod.imgURL}`} // 
+                                                     src={`http://localhost:3000${encodeURI(prod.imgURL)}`} // 
                                                     alt={prod.name}
                                                     style={{ width: '100px', height: '100px', objectFit: 'contain' }}
                                                 />
