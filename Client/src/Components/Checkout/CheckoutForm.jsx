@@ -71,50 +71,50 @@ const CheckoutForm = () => {
     }
 
     const checkOutHandler = async (e) => {
-        e.preventDefault()
-
+        e.preventDefault();
+    
         if (!userDetails.firstName || !userDetails.lastName || !userDetails.userEmail || !userDetails.phoneNumber || !userDetails.address || !userDetails.zipCode || !userDetails.city || !userDetails.userState) {
-            toast.error("Please fill all fields", { autoClose: 500, theme: "colored" })
-        }
-        else {
+            toast.error("Please fill all fields", { autoClose: 500, theme: "colored" });
+        } else {
             try {
-                const { data: { key } } = await axios.get(`${process.env.REACT_APP_GET_KEY}`)
-                const { data } = await axios.post(`${process.env.REACT_APP_GET_CHECKOUT}`, {
+                // Gọi API để tạo đơn hàng
+                const { data } = await axios.post(`http://localhost:3000/checkout/create-order`, {
                     amount: totalAmount,
                     productDetails: JSON.stringify(cart),
                     userId: userData._id,
                     userDetails: JSON.stringify(userDetails),
-                })
-
+                });
+    
                 const options = {
-                    key: key,
-                    amount: totalAmount,
+                    key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+                    amount: totalAmount * 100,
                     currency: "INR",
-                    name: userData.firstName + ' ' + userData.lastName,
+                    name: `${userData.firstName} ${userData.lastName}`,
                     description: "Payment",
                     image: profile,
                     order_id: data.order.id,
-                    callback_url: process.env.REACT_APP_GET_PAYMENTVERIFICATION,
+                    callback_url: `http://localhost:3000/checkout/verify-payment`,
                     prefill: {
-                        name: userData.firstName + ' ' + userData.lastName,
+                        name: `${userData.firstName} ${userData.lastName}`,
                         email: userData.email,
-                        contact: userData.phoneNumber
+                        contact: userData.phoneNumber,
                     },
                     notes: {
-                        "address": `${userData.address} ${userData.city} ${userData.zipCode} ${userData.userState}`
+                        address: `${userData.address}, ${userData.city}, ${userData.zipCode}, ${userData.userState}`,
                     },
                     theme: {
-                        "color": "#1976d2"
+                        color: "#1976d2",
                     },
-
                 };
+    
                 const razor = new window.Razorpay(options);
                 razor.open();
             } catch (error) {
-                console.log(error);
+                console.error(error);
+                toast.error("Error during checkout", { autoClose: 500, theme: "colored" });
             }
         }
-    }
+    };
 
     const handleOnchange = (e) => {
         setUserDetails({ ...userDetails, [e.target.name]: e.target.value })
@@ -129,16 +129,16 @@ const CheckoutForm = () => {
                 <form noValidate autoComplete="off" className={styles.checkout_form} onSubmit={checkOutHandler} >
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <TextField inputProps={{ readOnly: true }} disabled label="First Name" name='firstName' value={userDetails.firstName || ''} onChange={handleOnchange} variant="outlined" fullWidth />
+                            <TextField label="First Name" name='firstName' value={userDetails.firstName || ''} onChange={handleOnchange} variant="outlined" fullWidth />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField inputProps={{ readOnly: true }} disabled label="Last Name" name='lastName' value={userDetails.lastName || ''} onChange={handleOnchange} variant="outlined" fullWidth />
+                            <TextField /*inputProps={{ readOnly: true }} disabled*/ label="Last Name" name='lastName' value={userDetails.lastName || ''} onChange={handleOnchange} variant="outlined" fullWidth />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField inputProps={{ readOnly: true }} disabled label="Contact Number" type='tel' name='phoneNumber' value={userDetails.phoneNumber || ''} onChange={handleOnchange} variant="outlined" fullWidth />
+                            <TextField /*inputProps={{ readOnly: true }} disabled*/ label="Contact Number" type='tel' name='phoneNumber' value={userDetails.phoneNumber || ''} onChange={handleOnchange} variant="outlined" fullWidth />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField inputProps={{ readOnly: true }} disabled label="Email" name='userEmail' value={userDetails.userEmail || ''} onChange={handleOnchange} variant="outlined" fullWidth />
+                            <TextField /*inputProps={{ readOnly: true }} disabled*/ label="Email" name='userEmail' value={userDetails.userEmail || ''} onChange={handleOnchange} variant="outlined" fullWidth />
                         </Grid>
                         <Grid item xs={12}>
                             <TextField label="Address" name='address' value={userDetails.address || ''} onChange={handleOnchange} variant="outlined" fullWidth />

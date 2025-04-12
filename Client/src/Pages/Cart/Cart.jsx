@@ -58,16 +58,18 @@ const Cart = () => {
 
     const getCart = async () => {
         if (setProceed) {
-            const { data } = await axios.get(`${process.env.REACT_APP_GET_CART}`,
-                {
+            try {
+                const { data } = await axios.get(`http://localhost:3000/carts`, {
                     headers: {
-                        'Authorization': authToken
-                    }
-                })
-            setCart(data);
+                        Authorization: authToken,
+                    },
+                });
+                setCart(data); // Cập nhật state `cart`
+            } catch (error) {
+                toast.error("Error fetching cart", { autoClose: 500, theme: 'colored' });
+            }
         }
-
-    }
+    };
     const handleClose = () => {
         setOpenAlert(false);
         navigate('/')
@@ -132,10 +134,9 @@ const Cart = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
                         {
                             cart.length > 0 &&
-                            cart.map(product =>
-                                <CartCard product={product} removeFromCart={removeFromCart} key={product._id} />
-
-                            )}
+                            cart.map(product => (
+                                <CartCard product={product} removeFromCart={removeFromCart} key={product.productId._id} />
+                            ))}
                     </Box>
 
                     {

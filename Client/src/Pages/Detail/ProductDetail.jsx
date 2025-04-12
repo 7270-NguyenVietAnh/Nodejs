@@ -70,24 +70,31 @@ const ProductDetail = () => {
     const addToCart = async (product) => {
         if (setProceed) {
             try {
-
-
-                const { data } = await axios.post(`${process.env.REACT_APP_ADD_CART}`, { _id: product._id, quantity: productQuantity }, {
-                    headers: {
-                        'Authorization': authToken
+                const { data } = await axios.post(
+                    `http://localhost:3000/carts/add`,
+                    { productId: product._id, quantity: productQuantity },
+                    {
+                        headers: {
+                            Authorization: authToken,
+                        },
                     }
-                })
-                setCart(data)
-                setCart([...cart, product])
-                toast.success("Added To Cart", { autoClose: 500, theme: 'colored' })
+                );
+                toast.success("Added To Cart", { autoClose: 500, theme: 'colored' });
+    
+                // Gọi lại API để cập nhật giỏ hàng
+                const cartData = await axios.get(`${process.env.REACT_APP_GET_CART}`, {
+                    headers: {
+                        Authorization: authToken,
+                    },
+                });
+                setCart(cartData.data); // Cập nhật state `cart`
             } catch (error) {
-                toast.error(error.response.data.msg, { autoClose: 500, theme: 'colored' })
+                toast.error(error.response?.data?.message || "Error adding to cart", { autoClose: 500, theme: 'colored' });
             }
-        }
-        else {
+        } else {
             setOpenAlert(true);
         }
-    }
+    };
     const addToWhishList = async (product) => {
         if (setProceed) {
             try {
