@@ -95,26 +95,38 @@ const ProductDetail = () => {
             setOpenAlert(true);
         }
     };
-    const addToWhishList = async (product) => {
+    const getWishList = async () => {
         if (setProceed) {
             try {
-                const { data } = await axios.post(`${process.env.REACT_APP_ADD_WISHLIST}`, { _id: product._id }, {
+                const { data } = await axios.get(`http://localhost:3000/wishlist`, {
                     headers: {
-                        'Authorization': authToken
-                    }
-                })
-                setWishlistData(data)
-                setWishlistData([...wishlistData, product])
-                toast.success("Added To Wishlist", { autoClose: 500, theme: 'colored' })
+                        Authorization: authToken,
+                    },
+                });
+                setWishlistData(data);
+            } catch (error) {
+                toast.error("Error fetching wishlist", { autoClose: 500, theme: 'colored' });
             }
-            catch (error) {
-                toast.error(error.response.data.msg, { autoClose: 500, theme: 'colored' })
-            }
-        }
-        else {
+        } else {
             setOpenAlert(true);
         }
-
+    };
+    const addToWishlist = async (product) => {
+        if (setProceed) {
+            try {
+                await axios.post(`http://localhost:3000/wishlist/add`, {
+                    productId: product._id,
+                }, {
+                    headers: {
+                        Authorization: authToken,
+                    },
+                });
+                toast.success("Added to Wishlist", { autoClose: 500, theme: 'colored' });
+                getWishList(); // Cập nhật danh sách Wishlist
+            } catch (error) {
+                toast.error("Error adding product to wishlist", { autoClose: 500, theme: 'colored' });
+            }
+        }
     };
     const shareProduct = (product) => {
 
@@ -270,7 +282,7 @@ const ProductDetail = () => {
                                     <Button variant='contained' className='all-btn' startIcon={<MdAddShoppingCart />} onClick={(() => addToCart(product))}>Buy</Button>
                                 </Tooltip>
                                 <Tooltip title='Add To Wishlist'>
-                                    <Button style={{ marginLeft: 10, }} size='small' variant='contained' className='all-btn' onClick={(() => addToWhishList(product))}>
+                                    <Button style={{ marginLeft: 10, }} size='small' variant='contained' className='all-btn' onClick={(() => addToWishlist(product))}>
                                         {<AiFillHeart fontSize={21}/>}
                                     </Button>
 
