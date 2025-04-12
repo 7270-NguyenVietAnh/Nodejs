@@ -13,7 +13,7 @@ const ForgotPasswordForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            const sendEmail = await axios.post(`${process.env.REACT_APP_FORGOT_PASSWORD}`, { email: email })
+            const sendEmail = await axios.post(`http://localhost:3000/auth/forgotpassword`, { email: email })
             toast.success(sendEmail.data.msg, { autoClose: 500, theme: 'colored' })
             setIsSentMail(true);
         } catch (error) {
@@ -80,7 +80,7 @@ const ForgotPasswordForm = () => {
                     <Typography component="h2" variant="h6" color='#1976d2' margin="20px 0">
                         Email Sent Successfully
                     </Typography>
-                    <a href="https://mail.google.com/mail/" target='_blank' rel='noreferrer'>  <Button endIcon={<MdMailOutline />} variant='contained'>Open Mail</Button></a>
+                    <a href="https://mailtrap.io/home" target='_blank' rel='noreferrer'>  <Button endIcon={<MdMailOutline />} variant='contained'>Open Mail</Button></a>
                 </Box>
             }
         </>

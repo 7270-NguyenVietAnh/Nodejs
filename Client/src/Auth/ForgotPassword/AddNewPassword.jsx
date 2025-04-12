@@ -18,23 +18,19 @@ const AddNewPassword = () => {
     };
     let navigate = useNavigate()
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         try {
+            const res = await axios.post(`http://localhost:3000/auth/resetpassword/${token}`, {
+                password: password
+            });
 
-            const { data } = await axios.post(`${process.env.REACT_APP_FORGOT_PASSWORD}/${id}/${token}`, { newPassword: password })
-            if (data.msg.name == "TokenExpiredError") {
-                toast.error("Token is expired Please try again", { autoClose: 500, theme: 'colored' })
-                navigate('/login')
-            }
-            else {
-                toast.success(data.msg, { autoClose: 500, theme: 'colored' })
-                navigate('/login')
-            }
-
+            toast.success("Password reset successful!", { autoClose: 500, theme: 'colored' });
+            navigate('/login');
         } catch (error) {
-            toast.error(error.response.data.msg, { autoClose: 500, theme: 'colored' })
+            const msg = error.response?.data?.msg || "Reset failed";
+            toast.error(msg, { autoClose: 500, theme: 'colored' });
         }
-    }
+    };
 
 
 
