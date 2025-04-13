@@ -8,6 +8,28 @@ const constants = require('../utils/constants');
 const User = require('../schemas/user');
 const bcrypt = require('bcrypt');
 
+router.put('/toggle-status/:id', async function (req, res) {
+    try {
+        const { id } = req.params;
+        const { isDelete } = req.body;
+
+        // Cập nhật trạng thái isDelete
+        const user = await User.findByIdAndUpdate(
+            id,
+            { isDelete },
+            { new: true } // Trả về document đã cập nhật
+        );
+
+        if (!user) {
+            return res.status(404).send({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).send({ success: true, message: 'User status updated successfully', user });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        res.status(500).send({ success: false, message: 'Failed to update user status' });
+    }
+});
 router.put('/:id', async function (req, res, next) {
     try {
         const { fullName, email, avatarUrl, currentPassword, newPassword } = req.body;
@@ -59,10 +81,17 @@ router.put('/:id', async function (req, res, next) {
     }
 });
 
-router.get('/',check_authentication,check_authorization(constants.MOD_PERMISSION), async function (req, res, next) {
-  console.log(req.headers.authorization);
-  let users = await userController.GetAllUser();
-  CreateSuccessResponse(res, 200, users)
+router.get('/', check_authentication, check_authorization(constants.MOD_PERMISSION), async function (req, res, next) {
+    try {
+        const users = await User.find().select('_id username email createdAt');
+        res.status(200).send(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).send({
+            success: false,
+            message: 'Failed to fetch users',
+        });
+    }
 });
 router.post('/', async function (req, res, next) {
   try {

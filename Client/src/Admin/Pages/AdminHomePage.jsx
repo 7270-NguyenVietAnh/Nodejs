@@ -18,16 +18,16 @@ const AdminHomePage = () => {
         try {
             const { data } = await axios.get(`http://localhost:3000/users`, {
                 headers: {
-                    'Authorization': authToken
-                }
-            })
-            setUser(data)
-            setAdmin(true)
+                    'Authorization': authToken,
+                },
+            });
+            setUser(data); // Lưu danh sách người dùng vào state
+            setAdmin(true);
         } catch (error) {
-            !isAdmin && navigate('/')
-            toast.error(error.response.data, { autoClose: 500, theme: "colored" });
+            !isAdmin && navigate('/');
+            toast.error(error.response?.data?.message || 'Failed to fetch users', { autoClose: 500, theme: 'colored' });
         }
-    }
+    };
     return (
         <>
             {isAdmin && (

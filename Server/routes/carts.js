@@ -9,11 +9,31 @@ router.get('/', check_authentication, async (req, res) => {
         const userId = req.user.id;
         const cart = await Cart.findOne({ userId }).populate('items.productId');
         if (!cart) {
+            
             return res.status(200).json([]);
         }
+       
         res.status(200).json(cart.items);
+
     } catch (error) {
+       
         console.error(error);
+
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+router.get('/check', check_authentication, async (req, res) => {
+    try {
+
+      
+        const carts = await Cart.find().populate('userId'); // Populate để lấy thông tin người dùng
+        console.log(carts, "dsadsds");
+        res.status(200).json(carts);
+
+    } catch (error) {
+       
+        console.error(error);
+
         res.status(500).json({ message: 'Internal server error' });
     }
 });

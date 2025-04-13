@@ -74,38 +74,76 @@ router.get('/:id', async function (req, res, next) {
         })
     }
 });
-router.post('/', async function (req, res, next) {
+router.post('/', upload.single('excelFile'), async function (req, res, next) {
     try {
-        let body = req.body;
-        let category = await categorySchema.findOne({ name: body.category })
-        if (category) {
-            let newProduct = productSchema({
-                name: body.name,
-                price: body.price ? body.price : 999999999,
-                quantity: body.quantity ? body.quantity : 10,
-                category: category._id,
-                description: body.description || "",
-                imgURL: body.imgURL || "",
-                slug: slugify(body.name, {
-                    lower: true
-                })
-            });
-            await newProduct.save()
-            res.status(200).send({
+        // Kiểm tra nếu có file Excel được gửi lên
+        if (req.file) {
+            const XLSX = require('xlsx');
+            const workbook = XLSX.readFile(req.file.path);
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = XLSX.Sheets[sheetName];
+            const products = XLSX.utils.sheet_to_json(worksheet);
+
+            const savedProducts = [];
+
+            for (const product of products) {
+                const { name, price, quantity, category, description, imgURL } = product;
+
+                // Tìm category
+                const categoryDoc = await categorySchema.findOne({ name: category });
+                if (!categoryDoc) {
+                    return res.status(404).send({ success: false, message: `Category ${category} not found` });
+                }
+
+                // Sử dụng imgURL từ file Excel nếu có
+                const newProduct = new productSchema({
+                    name,
+                    price: price || 999999999,
+                    quantity: quantity || 10,
+                    category: categoryDoc._id,
+                    description: description || '',
+                    imgURL: imgURL || '', // Sử dụng đường dẫn từ Excel
+                    slug: slugify(name, { lower: true }),
+                });
+
+                const savedProduct = await newProduct.save();
+                savedProducts.push(savedProduct);
+            }
+
+            return res.status(200).send({
                 success: true,
-                data: newProduct
+                message: 'Products imported successfully',
+                data: savedProducts,
             });
-        } else {
-            res.status(404).send({
-                success: false,
-                message: "khong tim thay category"
-            })
         }
+
+        // Xử lý thêm sản phẩm bằng tay
+        const body = req.body;
+        const category = await categorySchema.findOne({ name: body.category });
+        if (!category) {
+            return res.status(404).send({ success: false, message: 'Category not found' });
+        }
+
+        const newProduct = new productSchema({
+            name: body.name,
+            price: body.price || 999999999,
+            quantity: body.quantity || 10,
+            category: category._id,
+            description: body.description || '',
+            imgURL: body.imgURL || '',
+            slug: slugify(body.name, { lower: true }),
+        });
+
+        await newProduct.save();
+        res.status(200).send({
+            success: true,
+            data: newProduct,
+        });
     } catch (error) {
-        res.status(404).send({
+        res.status(500).send({
             success: false,
-            message: error.message
-        })
+            message: error.message,
+        });
     }
 });
 
