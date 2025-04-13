@@ -23,7 +23,7 @@ const upload = multer({ storage: storage });
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
     let query = req.query;
-    let objQuery = {};
+    let objQuery = {isDeleted: false};
 
     if (query.category) {
         const category = await categorySchema.findOne({ slug: query.category });

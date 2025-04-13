@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AiOutlineSearch, AiOutlineEdit } from 'react-icons/ai';
+import { AiOutlineSearch, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
 import {
     Table,
     TableBody,
@@ -32,6 +32,7 @@ const ProductTable = () => {
         { id: 'image', label: 'Image', minWidth: 100, align: 'center' },
         { id: 'price', label: 'Price', minWidth: 100, align: 'center' },
         { id: 'edit', label: 'Edit', minWidth: 100, align: 'center' },
+        { id: 'delete', label: 'Delete', minWidth: 100, align: 'center' },
     ];
 
     const fetchProducts = async () => {
@@ -51,6 +52,15 @@ const ProductTable = () => {
                 (item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (item.price && item.price.toString().toLowerCase().includes(searchTerm.toLowerCase()))
         );
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`http://localhost:3000/products/${id}`);
+            fetchProducts(); // Refresh the product list
+        } catch (error) {
+            console.error('Error deleting product:', error);
+        }
     };
 
     const handleSearch = (event) => {
@@ -156,6 +166,14 @@ const ProductTable = () => {
                                             onClick={() => navigate(`/admin/home/product/edit/${prod._id}`)}
                                         >
                                             <AiOutlineEdit size={20} />
+                                        </IconButton>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <IconButton
+                                            color="secondary"
+                                            onClick={() => handleDelete(prod._id)}
+                                        >
+                                            <AiOutlineDelete size={20} />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
