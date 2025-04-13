@@ -12,6 +12,7 @@ const EditProduct = () => {
     const [productInfo, setProductInfo] = useState({
         name: '',
         price: '',
+        quantity: '',
         description: '',
         imgURL: '',
         category: '',
@@ -26,6 +27,7 @@ const EditProduct = () => {
             setProductInfo({
                 name: data.data.name,
                 price: data.data.price,
+                quantity: data.data.quantity,
                 description: data.data.description,
                 imgURL: data.data.imgURL,
                 category: data.data.category._id,
@@ -71,16 +73,17 @@ const EditProduct = () => {
             const formData = new FormData();
             formData.append('name', productInfo.name);
             formData.append('price', productInfo.price);
+            formData.append('quantity', productInfo.quantity);
             formData.append('description', productInfo.description);
             formData.append('category', productInfo.category);
             if (selectedFile) {
-                formData.append('image', selectedFile); // Thêm file ảnh vào FormData
+                formData.append('image', selectedFile);
             }
-    
+
             const response = await axios.put(`http://localhost:3000/products/${id}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-    
+
             if (response.data.success) {
                 alert('Product updated successfully!');
                 navigate(-1);
@@ -123,6 +126,16 @@ const EditProduct = () => {
                         name="price"
                         type="number"
                         value={productInfo.price}
+                        onChange={handleChange}
+                        fullWidth
+                        sx={{ mb: 2 }}
+                        required
+                    />
+                    <TextField
+                        label="Quantity"
+                        name="quantity"
+                        type="number"
+                        value={productInfo.quantity}
                         onChange={handleChange}
                         fullWidth
                         sx={{ mb: 2 }}

@@ -5,6 +5,8 @@ let categorySchema = require('../schemas/category')
 let slugify = require('slugify')
 const multer = require('multer');
 const path = require('path');
+const XLSX = require('xlsx');
+const fs = require('fs');
 
 // Cấu hình nơi lưu ảnh và tên file
 const storage = multer.diskStorage({
@@ -74,41 +76,54 @@ router.get('/:id', async function (req, res, next) {
         })
     }
 });
+
 router.post('/', upload.single('excelFile'), async function (req, res, next) {
     try {
-        // Kiểm tra nếu có file Excel được gửi lên
         if (req.file) {
-            const XLSX = require('xlsx');
             const workbook = XLSX.readFile(req.file.path);
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = XLSX.Sheets[sheetName];
-            const products = XLSX.utils.sheet_to_json(worksheet);
+            const sheetName = workbook.SheetNames[0]; 
+            const worksheet = workbook.Sheets[sheetName];
+
+            
+            let rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            rows.shift(); 
 
             const savedProducts = [];
 
-            for (const product of products) {
-                const { name, price, quantity, category, description, imgURL } = product;
-
-                // Tìm category
+            for (const row of rows) {
+                const [name, price, quantity, category, description, imgURL] = row;
+            
                 const categoryDoc = await categorySchema.findOne({ name: category });
                 if (!categoryDoc) {
                     return res.status(404).send({ success: false, message: `Category ${category} not found` });
                 }
-
-                // Sử dụng imgURL từ file Excel nếu có
+            
+                const existingProduct = await productSchema.findOne({ name });
+            
+                if (existingProduct) {
+                    
+                    existingProduct.quantity += quantity || 0;
+                    await existingProduct.save();
+                    savedProducts.push(existingProduct);
+                    continue;
+                }
+         
                 const newProduct = new productSchema({
                     name,
                     price: price || 999999999,
                     quantity: quantity || 10,
                     category: categoryDoc._id,
                     description: description || '',
-                    imgURL: imgURL || '', // Sử dụng đường dẫn từ Excel
+                    imgURL: imgURL || '',
                     slug: slugify(name, { lower: true }),
                 });
-
+            
                 const savedProduct = await newProduct.save();
                 savedProducts.push(savedProduct);
             }
+
+            // Xoá file sau khi xử lý
+            fs.unlinkSync(req.file.path);
 
             return res.status(200).send({
                 success: true,
@@ -117,7 +132,7 @@ router.post('/', upload.single('excelFile'), async function (req, res, next) {
             });
         }
 
-        // Xử lý thêm sản phẩm bằng tay
+        // Trường hợp thêm thủ công (form)
         const body = req.body;
         const category = await categorySchema.findOne({ name: body.category });
         if (!category) {
@@ -146,6 +161,7 @@ router.post('/', upload.single('excelFile'), async function (req, res, next) {
         });
     }
 });
+
 
 router.put('/:id', upload.single('image'), async function (req, res, next) {
     try {

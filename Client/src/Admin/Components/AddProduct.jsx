@@ -111,7 +111,7 @@ const AddProduct = ({ getProductInfo }) => {
     return (
         <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: "20px 0" }}>
-                <Typography variant='h6' color="#1976d2" fontWeight="bold">Thêm Sản Phẩm Mới</Typography>
+                <Typography variant='h6' color="#1976d2" fontWeight="bold"></Typography>
                 <Button variant='contained' endIcon={<MdProductionQuantityLimits />} onClick={() => setOpen(true)}>Thêm</Button>
             </Box>
             <Divider sx={{ mb: 5 }} />

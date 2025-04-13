@@ -21,7 +21,7 @@ const ImportExcel = ({ getProductInfo }) => {
         }
 
         const formData = new FormData();
-        formData.append('excelFile', file); // Tên phải khớp với multer trên backend
+        formData.append('excelFile', file); 
 
         try {
             const { data } = await axios.post("http://localhost:3000/products", formData, {
