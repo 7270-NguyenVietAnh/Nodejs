@@ -82,7 +82,7 @@ const ProductDetail = () => {
                 toast.success("Added To Cart", { autoClose: 500, theme: 'colored' });
     
                 // Gọi lại API để cập nhật giỏ hàng
-                const cartData = await axios.get(`${process.env.REACT_APP_GET_CART}`, {
+                const cartData = await axios.get(`http://localhost:3000/carts`, {
                     headers: {
                         Authorization: authToken,
                     },
