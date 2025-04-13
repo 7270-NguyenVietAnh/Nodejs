@@ -72,9 +72,7 @@ const UpdateDetails = () => {
         console.log('User Data ID:', userData._id); // Debug userData._id
 
         try {
-            if (!userDetails.email || !userDetails.fullName) {
-                toast.error('Please fill all required fields', { autoClose: 500, theme: 'colored' });
-            } else if (!emailRegex.test(userDetails.email)) {
+            if (!emailRegex.test(userDetails.email)) {
                 toast.error('Please enter a valid email', { autoClose: 500, theme: 'colored' });
             } else {
                 const payload = {
