@@ -8,7 +8,7 @@ const CartCard = ({ product, removeFromCart }) => {
 
     return (
         <Card className={styles.main_cart}>
-            <Link to={`/Detail/type/${product?.productId?.type}/${product?.productId?._id}`}>
+            <Link to={`/Detail/type/${product?.productId?.category}/${product?.productId?._id}`}>
             <CardActionArea className={styles.card_action} >
                 <Box className={styles.img_box}  >
                         <img alt={product?.productId?.name}  loading='lazy' src={`http://localhost:3000${encodeURI(product?.productId?.imgURL)}`} className={styles.img} />

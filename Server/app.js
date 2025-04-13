@@ -41,6 +41,7 @@ app.use('/roles', require('./routes/roles'));
 app.use('/products', require('./routes/products'));
 app.use('/categories', require('./routes/categories'));
 app.use('/carts', require('./routes/carts'));
+app.use('/checkout', require('./routes/checkout'));
 app.use('/wishlist', require('./routes/wishlists'));
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 

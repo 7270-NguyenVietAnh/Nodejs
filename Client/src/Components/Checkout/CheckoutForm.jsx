@@ -77,40 +77,30 @@ const CheckoutForm = () => {
             toast.error("Please fill all fields", { autoClose: 500, theme: "colored" });
         } else {
             try {
+                // Debug dữ liệu trước khi gửi
+                console.log('Checkout Data:', {
+                    amount: totalAmount,
+                    productDetails: JSON.stringify(cart),
+                    userDetails: JSON.stringify(userDetails),
+                });
+    
                 // Gọi API để tạo đơn hàng
                 const { data } = await axios.post(`http://localhost:3000/checkout/create-order`, {
                     amount: totalAmount,
                     productDetails: JSON.stringify(cart),
-                    userId: userData._id,
                     userDetails: JSON.stringify(userDetails),
+                }, {
+                    headers: {
+                        Authorization: authToken, // Gửi token trong header
+                    },
                 });
     
-                const options = {
-                    key: process.env.REACT_APP_RAZORPAY_KEY_ID,
-                    amount: totalAmount * 100,
-                    currency: "INR",
-                    name: `${userData.firstName} ${userData.lastName}`,
-                    description: "Payment",
-                    image: profile,
-                    order_id: data.order.id,
-                    callback_url: `http://localhost:3000/checkout/verify-payment`,
-                    prefill: {
-                        name: `${userData.firstName} ${userData.lastName}`,
-                        email: userData.email,
-                        contact: userData.phoneNumber,
-                    },
-                    notes: {
-                        address: `${userData.address}, ${userData.city}, ${userData.zipCode}, ${userData.userState}`,
-                    },
-                    theme: {
-                        color: "#1976d2",
-                    },
-                };
-    
-                const razor = new window.Razorpay(options);
-                razor.open();
+                if (data.success) {
+                    toast.success("Order placed successfully!", { autoClose: 500, theme: "colored" });
+                    navigate('/paymentsuccess'); // Điều hướng đến trang thông báo thành công
+                }
             } catch (error) {
-                console.error(error);
+                console.error('Checkout Error:', error);
                 toast.error("Error during checkout", { autoClose: 500, theme: "colored" });
             }
         }
