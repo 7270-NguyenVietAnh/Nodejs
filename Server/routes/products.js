@@ -89,25 +89,34 @@ router.post('/', upload.single('excelFile'), async function (req, res, next) {
             rows.shift(); 
 
             const savedProducts = [];
+            const skippedProducts = []; // Lưu danh sách sản phẩm bị bỏ qua
 
             for (const row of rows) {
                 const [name, price, quantity, category, description, imgURL] = row;
-            
+
                 const categoryDoc = await categorySchema.findOne({ name: category });
                 if (!categoryDoc) {
-                    return res.status(404).send({ success: false, message: `Category ${category} not found` });
+                    skippedProducts.push({ name, reason: `Category "${category}" not found` });
+                    continue;
                 }
-            
-                const existingProduct = await productSchema.findOne({ name });
-            
+
+                // Kiểm tra sản phẩm trùng tên với isDeleted: true
+                const deletedProduct = await productSchema.findOne({ name, isDeleted: true });
+                if (deletedProduct) {
+                    skippedProducts.push({ name, reason: 'Product is marked as deleted' });
+                    continue;
+                }
+
+                const existingProduct = await productSchema.findOne({ name, isDeleted: false });
+
                 if (existingProduct) {
-                    
+                    // Cộng dồn quantity nếu sản phẩm đã tồn tại
                     existingProduct.quantity += quantity || 0;
                     await existingProduct.save();
                     savedProducts.push(existingProduct);
                     continue;
                 }
-         
+
                 const newProduct = new productSchema({
                     name,
                     price: price || 999999999,
@@ -117,7 +126,7 @@ router.post('/', upload.single('excelFile'), async function (req, res, next) {
                     imgURL: imgURL || '',
                     slug: slugify(name, { lower: true }),
                 });
-            
+
                 const savedProduct = await newProduct.save();
                 savedProducts.push(savedProduct);
             }
@@ -137,6 +146,28 @@ router.post('/', upload.single('excelFile'), async function (req, res, next) {
         const category = await categorySchema.findOne({ name: body.category });
         if (!category) {
             return res.status(404).send({ success: false, message: 'Category not found' });
+        }
+        
+        // Kiểm tra sản phẩm trùng tên với isDeleted: true
+        const deletedProduct = await productSchema.findOne({ name: body.name, isDeleted: true });
+        if (deletedProduct) {
+            return res.status(400).send({
+                success: false,
+                message: 'Sản phẩm đã tồn tại và bị xóa. Không thể thêm lại.',
+            });
+        }
+
+        const existingProduct = await productSchema.findOne({ name: body.name });
+
+        if (existingProduct) {
+            // Cộng dồn quantity nếu sản phẩm đã tồn tại
+            existingProduct.quantity += Number(body.quantity) || 0;
+            await existingProduct.save();
+            return res.status(200).send({
+                success: true,
+                message: 'Product quantity updated successfully',
+                data: existingProduct,
+            });
         }
 
         const newProduct = new productSchema({
