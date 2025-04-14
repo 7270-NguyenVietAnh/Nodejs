@@ -12,7 +12,7 @@ module.exports = {
     sendMailForgotPassword: async function(to,URL){
         return await transporter.sendMail({
             to:to,
-            subject:"RESET PASSWORDPASSWORD",
+            subject:"RESET PASSWORD",
             html:`<a href=${URL}>CLICK VAO DAY DE RESET PASSWORD</a>`
         })
     }
