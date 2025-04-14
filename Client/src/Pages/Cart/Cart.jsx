@@ -40,7 +40,7 @@ const Cart = () => {
     useEffect(() => {
         if (setProceed) {
             getCart()
-            getPreviousOrder()
+            //getPreviousOrder()
         }
         else {
             setOpenAlert(true)

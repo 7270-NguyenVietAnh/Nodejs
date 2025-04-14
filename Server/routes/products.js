@@ -163,7 +163,7 @@ router.post('/', upload.single('excelFile'), async function (req, res, next) {
 });
 
 
-router.put('/:id', upload.single('image'), async function (req, res, next) {
+router.put('/:id', upload.single('imageFile'), async function (req, res, next) {
     try {
         let body = req.body;
         let updatedObj = {};

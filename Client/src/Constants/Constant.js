@@ -3,7 +3,7 @@ import axios from "axios";
 import { forwardRef } from "react";
 const getCart = async (setProceed, setCart, authToken) => {
     if (setProceed) {
-        const { data } = await axios.get(`${process.env.REACT_APP_GET_CART}`,
+        const { data } = await axios.get(`http://localhost:3000/carts`,
             {
                 headers: {
                     'Authorization': authToken
@@ -14,7 +14,7 @@ const getCart = async (setProceed, setCart, authToken) => {
 }
 const getWishList = async (setProceed, setWishlistData, authToken) => {
     if (setProceed) {
-        const { data } = await axios.get(`${process.env.REACT_APP_GET_WISHLIST}`,
+        const { data } = await axios.get(`http://localhost:3000/wishlist`,
             {
                 headers: {
                     'Authorization': authToken
