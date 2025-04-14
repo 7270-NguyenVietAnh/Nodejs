@@ -47,4 +47,55 @@ router.post('/create-order', check_authentication, async (req, res) => {
     }
 });
 
+router.get('/ordered-users', check_authentication, async (req, res) => {
+    try {
+        // Lấy danh sách đơn hàng và populate thông tin người dùng và sản phẩm
+        const orders = await Order.find()
+            .populate('userId', 'username email address city zipCode userState')
+            .populate('productDetails.productId', 'name imgURL'); // Populate thông tin sản phẩm
+
+        if (orders.length === 0) {
+            return res.status(404).send({
+                success: false,
+                message: 'No orders found',
+            });
+        }
+
+        // Nhóm đơn hàng theo người dùng
+        const groupedOrders = orders.reduce((acc, order) => {
+            const userId = order.userId._id.toString();
+            if (!acc[userId]) {
+                acc[userId] = {
+                    userDetails: order.userId,
+                    orders: [],
+                };
+            }
+            acc[userId].orders.push({
+                orderId: order._id,
+                amount: order.amount,
+                products: order.productDetails.map((product) => ({
+                    productId: product.productId._id,
+                    name: product.productId.name,
+                    imgURL: product.productId.imgURL,
+                    quantity: product.quantity,
+                })),
+                createdAt: order.createdAt,
+            });
+            return acc;
+        }, {});
+
+        res.status(200).send({
+            success: true,
+            message: 'Users and orders fetched successfully',
+            data: Object.values(groupedOrders),
+        });
+    } catch (error) {
+        console.error('Error fetching ordered users:', error);
+        res.status(500).send({
+            success: false,
+            message: 'Failed to fetch ordered users',
+        });
+    }
+});
+
 module.exports = router;
