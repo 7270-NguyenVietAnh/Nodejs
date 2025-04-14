@@ -75,7 +75,7 @@ const SingleCategory = () => {
                     flexDirection: 'column',
                 }}
             >
-                <Box sx={{ minWidth: 140 }}>
+                {/* <Box sx={{ minWidth: 140 }}>
                     <FormControl sx={{ width: 140 }}>
                         <Box
                             sx={{
@@ -93,11 +93,11 @@ const SingleCategory = () => {
                                 sx={{ width: 200 }}
                                 onChange={(e) => handleChange(e)}
                             >
-                                {/* Render filter options */}
+                                {/* Render filter options }
                             </Select>
                         </Box>
                     </FormControl>
-                </Box>
+                </Box> */}
                 {loading}
                 <Container
                     maxWidth="xl"
